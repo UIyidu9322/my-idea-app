@@ -35,7 +35,7 @@ jobs:
       run: |
         # 增加 --verbose 打印详细日志，万一报错能看清原因
         # 暂时去掉复杂的权限声明，先用最基础的命令确保能顺利吐出 APK
-        flet build apk --release --verbose
+        flet build apk --verbose
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
