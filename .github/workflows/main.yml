@@ -22,8 +22,6 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install flet
-        # 预先同意 Flet 的用户协议，防止它在服务器后台弹出提问导致卡死报错
-        flet config set flutter-licenses true || true
 
     - name: Setup Java
       uses: actions/setup-java@v4
@@ -31,11 +29,20 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
+    # ✨ 核心修复：提前帮系统把 Flutter 环境装好，防止弹窗提问卡死
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+
     - name: Build APK with Flet
       run: |
-        # 增加 --verbose 打印详细日志，万一报错能看清原因
-        # 暂时去掉复杂的权限声明，先用最基础的命令确保能顺利吐出 APK
+        # 预先同意协议（以防万一）
+        flet config set flutter-licenses true || true
+        # 真正开始打包
         flet build apk --verbose
+        # 允许命令静默通过提问
+        echo "y" | flet build apk --verbose || flet build apk --verbose
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
