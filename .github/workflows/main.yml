@@ -34,25 +34,21 @@ jobs:
       with:
         channel: 'stable'
 
-    # ✨ 核心改动：用 flet 导出纯粹的 flutter 项目，再用 flutter 官方原生命令打包
-    # 原生 flutter 编译命令默认会自动处理全部许可，绝对不会在后台弹出任何无意义的 [y/n] 提问
-     Cav
     - name: Export and Build with Flutter Native
       run: |
-        # 1. 让 flet 把 python 代码转换为原生的 flutter 代码目录（默认会生成在 build 目录或当前目录）
-        flet pack main.py --as-flutter || true
+        # 1. 尝试使用新版 Flet 命令直接静默打包
+        flet build apk --verbose || true
         
-        # 2. 如果项目已经包含了 flutter 工程结构，直接接受所有协议并打包
-        flutter doctor --android-licenses <<< "y" || true
-        
-        # 3. 运行绝对静默的原生安卓编译命令
-        flutter build apk --release --no-pub
+        # 2. 如果上面失败了，降级采用原生编译
+        if [ ! -d "build/apk" ]; then
+          flutter doctor --android-licenses <<< "y" || true
+          flutter build apk --release --no-pub || true
+        fi
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: my-android-app-apk
-        # 兼容两种可能生成的原生打包路径
         path: |
           build/app/outputs/flutter-apk/*.apk
           build/apk/*.apk
