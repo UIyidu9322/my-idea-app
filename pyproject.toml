@@ -1,1 +1,4 @@
+[tool.flet]
+app_name = "myideaapp"
+product_name = "我的随手记"
 
